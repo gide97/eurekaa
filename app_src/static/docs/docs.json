@@ -1,0 +1,93 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "gnugroho",
+    "version": "1.0.0",
+    "title": "Project for efishery reqruitment",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Node List",
+      "description": "Get list of sensor Nodes"
+    }
+  ],
+  "paths": {
+    "/nodelist": {
+      "get": {
+        "tags": ["Node List"],
+        "summary": "Returns number of node and id(s)",
+        "responses": {
+          "200": {
+            "description": "{num_of_sensor: (int), sensor_id: (list)}",
+            "schema": {
+              "$ref": "/nodelist"
+            }
+          }
+        }
+      }
+    },
+
+    "/startservice": {
+      "get": {
+        "tags": ["Start sensor monitor"],
+        "summary": "Start sensor monitoring service",
+        "responses": {
+          "200": {
+            "description": "If server success to run service it will return OK. You will got FAIL if: Service already running, or exception occurs with message."
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Request not found."
+          }
+        }
+      }
+    },
+
+    "/stopservice": {
+      "get": {
+        "tags": ["Stop sensor monitor"],
+        "summary": "Stop sensor monitoring service",
+        "responses": {
+          "200": {
+            "description": "Always return OK"
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Request not found."
+          }
+        }
+      }
+    },
+
+    "/serverstatus": {
+      "get": {
+        "tags": ["Get server status"],
+        "summary": "Get information about server states such as: MQTT Broker address, List of sensor node, communication serial port (server to sensor node), Service status: RUNNING",
+        "responses": {
+          "200": {
+            "description": "Return json with keys: [MQTT_Broker, Sensor Node list, Serial Port, Service Status]"
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Request not found."
+          }
+        }
+      }
+    }
+  }
+}

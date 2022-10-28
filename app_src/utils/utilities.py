@@ -23,13 +23,14 @@ class CRC:
 
         return total, [total&0xff>>8, total&0xff]       # (int)total, [High byte, Low byte]
     
-    def verify(raw_data:bytearray)->tuple:
+    def verify(raw_data:list)->tuple:
         '''
             Return value: tuple(bool valid, datascrape)
-        '''
+        '''        
+        if len(raw_data) == 0:
+            print('empty data')
+            return (False, [], [])
 
-        print(raw_data)
-        
         data_scrape = {}
 
         t_raw = list(raw_data)[:]
@@ -59,7 +60,7 @@ class CRC:
         data_scrape['control'] = t_raw.pop(0)
         data_scrape['information'] = t_raw[:]
         
-        return True, data_scrape
+        return True, raw_data, data_scrape
 
 def generateDataFrame(sourceAddr:int, destAddr:int, control:int, information:bytearray=None) -> bytearray:
     '''

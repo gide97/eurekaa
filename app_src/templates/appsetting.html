@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Main Device Config</title>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
+      integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="{{url_for('static', filename='js/appsetting.js')}}"></script>
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='style/index.css')}}"
+    ></link>
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='style/appsetting.css')}}"
+    ></link>
+  </head>
+  <body>
+    <div class="navbar">
+      <div>gnugroho</div>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/appconfig">Config</a></li>
+        <li><a href="/checkmqtt">Mqtt Watcher</a></li>
+        <li><a href="/docs">Docs</a></li>
+      </ul>
+    </div>
+  
+    <div class="header">
+      <h1>Main Device Configuration</h1>
+      <p>
+        Configuration connections here
+      </p>
+    </div>
+  
+    <div class="content">
+        <div class="config-form">
+            <label for="mqtt-address">MQTT ADDRESS  </label>
+            <input type="text" name="mqtt-address">
+            <br/>
+            <label for="mqtt-port">MQTT PORT    </label>
+            <input type="text" name="mqtt-address">
+            <br/>
+            <label for="rf-usbport">RF USB PORT </label>
+            <input type="text" name="mqtt-address">
+            <br/>
+            <label for="read-period">SENSOR READ PERIOD </label>
+            <input type="number" name="read-period">
+            <br/>
+            <button onclick="bt_configure()">Submit</button>
+        </div>
+        <div>
+            <h2>Main Service Status</h2>
+            <ul id="service_status">
+            </ul>
+        </div>
+    </div>
+  </body>
+</html>

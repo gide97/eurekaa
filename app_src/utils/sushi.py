@@ -8,11 +8,9 @@
     [I]mplementation
 '''
 
-
 import sqlite3
 import os
 import json
-# from os import sync # pylint: disable=no-name-in-module
 from os import fsync
 
 class sushiWrapper(object):
@@ -36,7 +34,6 @@ class sushiWrapper(object):
                 break
             sql3 = sql3 + "," + rowname[i] + " " + rowdatatype[i]
         sql=sql1+sql2+sql3
-        # print(sql)
         self.db.execute(sql)
     def insert(self, tablename, rowname, rowdata):
         sql1 = "INSERT INTO " + tablename
@@ -56,23 +53,18 @@ class sushiWrapper(object):
             sql1 = sql1 + sql2 + sql3
         else:
             sql1 = sql1 + "(" + rowname[0] + ") values(?)"
-        # print(sql1)
-        #print(rowdata)
         self.db.execute(sql1,rowdata)
     def insertOne(self, tablename, rowname, rowdata):
         '''
        insert one data to available table. the data tuple count must be equal with row count. 
         '''
-        # print('sek sek')
         sql1 = "INSERT INTO " + tablename + str(rowname) + " values"
         sql2 = str(rowdata)
         sql=sql1+sql2
-        # print(sql)
         self.db.execute(sql)
     def select(self, tablename, row = None, value = None, column = "*"):
         if type(row) is tuple:
             sql ="SELECT " + column + " from "+ tablename + " WHERE " + row[0] + "='" + value[0] + "'"
-            # print(sql)
             for r in range(0,len(row)):
                 if r == 0: pass
                 else:
@@ -111,7 +103,6 @@ class sushiWrapper(object):
         valueTarget : the value updated in key
         '''
         sql = "UPDATE "+ tablename +" SET " + keyTarget + "='" + valueTarget + "' WHERE " + keySearch + "='" + valueSearch +"'"
-        # print(sql)
         self.db.execute(sql)
     def updateUnion(self, tablename, columnTarget, columnSearch, unionValue):
         sql = "UPDATE " + tablename + " SET"
@@ -154,7 +145,7 @@ class sushiWrapper(object):
             ln = 0
         return ln
     def commit(self, pwr=0, syc=True):
-        if pwr <= 0: #if power ok
+        if pwr <= 0:
             self.db.commit()
             if syc is True:
                 self.sync() #need to sync after commit

@@ -1,0 +1,13 @@
+#info-panel {
+  padding: 10px;
+  width: 90%;
+  height: 10rem;
+  max-height: 600px;
+
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+#myChart {
+  margin-top: 10px;
+}

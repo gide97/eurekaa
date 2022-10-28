@@ -6,12 +6,16 @@ from datetime import datetime, timedelta
 
 from .utilities import Command, CRC, generateDataFrame
 
-
-class SensorMonitor:
+class SerialRouter:
     def __init__(self, serialPort:str, baudRate:int):
+        '''
+            nodeId  : 1~255.    0 for supervisor
+        '''
+        #
+        # Serial configuration
+        #
         self.serialPort = serialPort
         self.baudRate = baudRate
-
         self.ser = serial.Serial(
             port = serialPort,
             baudrate = baudRate,
@@ -21,11 +25,10 @@ class SensorMonitor:
             timeout = 0.1
         )
 
-    def transaction(self, data:bytearray, timeout:int=5)->list:
+    def transaction(self, data:bytearray, timeout:int=2)->list:
         '''
             Send data and wait ack from sensor until 
         '''
-
         # tx data
         self.ser.write(data)
         
@@ -33,9 +36,9 @@ class SensorMonitor:
         recv_buffer = []
         flag_recieving = False
         t_time = datetime.now()
-        while datetime.now() - t_time < timedelta(seconds=timeout):     # Wait data stream until timeout
+        while datetime.now() - t_time < timedelta(seconds=timeout):     # Wait data stream 
             recv_data = self.ser.read().hex()
-            if len(recv_data) > 0:                                        # Receiving data stream
+            if len(recv_data) > 0:                                      # Receiving data stream
                 if recv_data == '7e':
                     flag_recieving = True
                 t_time = datetime.now()
@@ -43,7 +46,7 @@ class SensorMonitor:
             else:                                                       # When data stream is over
                 if flag_recieving: 
                     return recv_buffer                                  # TODO: Authenticate data with checksum
-        return []
+        return []                                                       # Timeout
         
         
     # Refer to documentation :: data link format 
@@ -52,14 +55,14 @@ class SensorMonitor:
             Get data from node
 
             Params:
-            nodeId      : 1 to 255
+            nodeId      : 1 to 255. 0 only for supervisor
             attribute   : [ OPTIONAL ] Additional information
 
             return value: tuple (<bool>isvalid, <list>raw data, <dict> data scape)
         '''
         dataframe = generateDataFrame(0, nodeId, Command.read, information)
         ack = self.transaction(dataframe)
-        isValid, data = CRC.verify(ack)
+        isValid, ack, data = CRC.verify(ack)
         return isValid, ack, data
 
     def writeData(self, nodeId:int, information:bytearray) -> tuple:
@@ -67,31 +70,22 @@ class SensorMonitor:
             Set command to node
 
             Params:
-            nodeId      : 1 to 255
-            attribute   : Additional information
-
+            nodeId          : 1 to 255. 0 only for supervisor
+            information     : Additional information written in json string
 
             return value: tuple(<bool>isValid, <list>raw data, <dict> data scape)
         '''
         dataframe = generateDataFrame(0, nodeId, Command.write, information)
         ack = self.transaction(dataframe)                                   # TODO: Verify before return the data
-        isValid, data = CRC.verify(ack)
+        isValid, ack, data = CRC.verify(ack)
         return isValid, ack, data
     
     def pingNode(self, nodeId:int) -> bool:
         '''
             PING the node
+            nodeId      : 1 to 255. 0 only for supervisor
         '''
         dataframe = generateDataFrame(0, nodeId, Command.ping)
         ack = self.transaction(dataframe)
-        print(f'ping ack: {ack}')
-
-
-# x = SensorMonitor('COM8', 115200)
-# x.getData(1)
-# x.pingNode(1)
-# x.writeData(1,'{"hello":"world"}')
-# for i in range(0,10):
-#     x.getData(1)
-#     sleep(1)
-    
+        isValid, data = CRC.verify(ack)
+        return isValid, ack, data
