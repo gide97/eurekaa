@@ -59,7 +59,7 @@ class SensorMonitor:
 
                     try:
                         firstrecord = self.db.select(f'Node_{request_id}', 'id' , 1, '*')[0][1]
-                        lastrecord = self.db.getLastRecord()[0][1]
+                        lastrecord = self.db.getLastRecord(f'Node_{request_id}')[0][1]
                         result = self.db.selectBetween(f'Node_{request_id}','Timestamp',start, end)
                         self.db_response = {
                             'request':{'request start':start, 'request end':end, 'nodeid':request_id},
@@ -69,14 +69,14 @@ class SensorMonitor:
                             },
                             'result':result
                         }
-                    except:
+                    except Exception as e:
                         self.db_response = {
                             'request':{'request start':start, 'request end':end, 'nodeid':request_id},
                             'status':{
                                 'first timestamp':0,
                                 'last timestamp':0,
                             },
-                            'result':"NA"
+                            'result': str(e)
                         }
             except Exception as e:
                 # print(str(e))

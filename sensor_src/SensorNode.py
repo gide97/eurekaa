@@ -45,10 +45,6 @@ class Node:
         self.sampleMeasurementRate = 1                                                      # Time period for read sensor
         # threading.Thread(target=self.listener, daemon=True).start()
         threading.Thread(target=self.sensor_measurement, daemon=True).start()
-    
-    def reinit(self):
-        self.serialTimeout = 5
-        self.sampleMeasurementRate = 1
 
     def apiCall(self, api, data):
         return self.api[api](data)
@@ -63,29 +59,42 @@ class Node:
     def handler_read(self) -> str:
         return json.dumps(self.sensorvalues)
     
-    def handler_write(self, data:list) -> str:
-        try:
-            data = ''.join([chr(i) for i in data])
-            data = json.loads(data)
-            if data['command'] == 'sampling_rate':  # SET MEASUREMENT SAMPLING RATE
-                self.sampleMeasurementRate == data['value']
-            if data['command'] == 'reset':          # SET NODE CONFIGURATION TO DEFAULT
-                self.reinit()
-        except:
-            return f'NA'
-
+    def handler_write(self) -> str:
         return f'OK'
 
     # Sensor metrology
     def sensor_measurement(self) -> str:
+        print('STARTED  ')
         while True:
             for i in range(0,5):
                 self.sensorvalues[f'sensor {i+1}'] = randint(0,100)
 
-                # Request to publish sensors value
-                buffer = generateDataFrame(self.id, 0, Command.action, json.dumps({"command":"publish", "topic":f"sensor_{self.id}", "values":self.sensorvalues}))
-                self.ser.write(buffer)
+                # request_id = data['source_addr']
+                # control_type = data['control']
+                # information = ''.join([chr(i) for i in data['information']])
+                # if control_type == Command.action:
+                #     try:
+                #         information = json.loads(information)
+                #         topic = json.dumps(information['topic'])
+                #         value = information['values']
+                #         if information['command'] == 'publish':
+                #             self.mqttclient.publish(topic, json.dumps(value))                           # MQTT PUBLISH
+
+                payload = {
+                    "command"    : "publish",
+                    "request_id" : self.id,
+                    "topic"      : f"Node_{self.id}",
+                    "values"     : self.sensorvalues
+
+                }
+
+                data = generateDataFrame(self.id, 0, Command.action, json.dumps(payload))
+                self.ser.write(data)
                 time.sleep(self.sampleMeasurementRate)
+
+
+                 
+                            
 
     # Communication
     def listener(self):
@@ -140,9 +149,8 @@ def reject():
     print('ERROR!! Arguments needed')
     print()
     print('Usage    :')
-    print('          python SensorNode.py -p <usb port> -b <baud rate> -i <node id>')
+    print('          python SensorNode.py -p <usb port> -i <node id>')
     print('          usb port     : Usb port')
-    print('          baud rate    : Baud rate')
     print('          node id      : 1-255')
     print()
     print('Example  : python SensorNode.py -p /dev/ttyUSB1 -i 1')

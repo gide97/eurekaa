@@ -1,12 +1,13 @@
-from flask import Flask, render_template, jsonify
+from time import sleep
+from flask import Flask, render_template, jsonify, request
 from flask_swagger_ui import get_swaggerui_blueprint
 import pathlib
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # from utils import sushi
-from utils.SerialRouter import SerialRouter
+from utils.SerialListener import SerialListener
 from SensorMonitor import SensorMonitor
 from MQTTservice import MQTTService
 
@@ -14,10 +15,13 @@ APP_DATA_PATH       = f'{pathlib.Path(__file__).parent.absolute()}/appdata'
 DB_PATH             = f'{APP_DATA_PATH}/db'
 APP_CONFIG_PATH     = f'{APP_DATA_PATH}/config.txt'
 
-MQTT_BROKER_ADDR    = '10.23.16.33'
+MQTT_BROKER_ADDR    = '192.168.0.105'
 MQTT_BROKER_PORT    = 1883
 
-SERIAL_COMM_PORT    = 'COM8'
+SERIAL_COMM_PORT    = 'COM31'
+BAUD_RATE           = 115200
+
+DB_TIMEOUT          = 3 # in second
 
 # Directory Initialization
 if not os.path.exists(APP_DATA_PATH):
@@ -26,16 +30,14 @@ if not os.path.exists(DB_PATH):
     os.mkdir(DB_PATH)
 
 # Create connection to nodes
-nodes = [1,2]                                                         # TODO: Add another node inside the list
-comm = SerialRouter(SERIAL_COMM_PORT, 9600)
+comm = SerialListener(SERIAL_COMM_PORT, BAUD_RATE)
 
 # MQTT SERVICE
 mqtt_client = MQTTService(brokerAddress=MQTT_BROKER_ADDR, brokerPort=MQTT_BROKER_PORT)                                                    # NOTE: Auto connect to broker
 
-# Main Routine
-_T_MONITOR = 2                                                        # NOTE: Monitor sensor each T sec
-monitor = SensorMonitor([[node, _T_MONITOR] for node in nodes], comm, mqtt_client, DB_PATH)
-# monitor.start()
+# Main Routine                                                        # NOTE: Monitor sensor each T sec
+monitor = SensorMonitor(comm, mqtt_client, DB_PATH)
+
 
 # WEB Server Creation
 app = Flask(__name__)
@@ -56,14 +58,6 @@ app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 def hello_world():
     return render_template('index.html')
 
-@app.route('/nodelist')
-def getNodeList():
-    resp = {
-        'num_of_sensor' : len(nodes),
-        'sensor_id'     : nodes
-    }
-    return jsonify(resp)
-
 @app.route('/startservice')
 def startservice():
     global monitor
@@ -77,7 +71,7 @@ def startservice():
 @app.route('/stopservice')
 def stopservice():
     global monitor
-    if not monitor.thd_service.isAlive():
+    if not monitor.run:
         return jsonify({'response':'service stopped'})
     try:
         monitor.run = False
@@ -94,10 +88,33 @@ def getappconfig():
     resp = {
         'MQTT_Broker':f'{MQTT_BROKER_ADDR}:{MQTT_BROKER_PORT}',
         'Serial Port':[SERIAL_COMM_PORT],
-        'Service status':["RUNNING" if monitor.thd_service.isAlive() else "STOPPED"],
-        'Sensor Node list':nodes
+        'Service status':["RUNNING" if monitor.run else "STOPPED"],
     }
     return jsonify(resp)
+
+@app.route('/getdb')
+def getDB():
+    arg = request.args.to_dict()
+    try:
+        payload = {
+            'command': 'getdata',
+            "request_id" : int(arg['nodeid']),
+            'start' : arg['start'],
+            'end' : arg['end']
+        }
+        monitor.db_response = {}
+        monitor.db_queue.append(payload)
+        t1 = datetime.now()
+        while datetime.now() - t1 < timedelta(seconds=DB_TIMEOUT):
+            if monitor.db_response != {}:
+                _temp = monitor.db_response
+                monitor.db_response = {}
+                return jsonify(_temp)
+            sleep(0.1)
+        return '400'
+    except:
+        return '400'   
+
 
 @app.route('/appconfig')
 def appconfig():

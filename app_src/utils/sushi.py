@@ -86,8 +86,8 @@ class sushiWrapper(object):
         for i in data:
             result.append(i)
         return result
-    def getLastRecord(self):
-        sql = 'SELECT * FROM Node_1 ORDER BY Timestamp DESC LIMIT 1'
+    def getLastRecord(self, tablename):
+        sql = f'SELECT * FROM {tablename} ORDER BY Timestamp DESC LIMIT 1'
         data = self.db.execute(sql)
         result = []
         for i in data:
