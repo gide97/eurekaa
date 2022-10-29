@@ -79,6 +79,13 @@ class sushiWrapper(object):
         for i in data:
             result.append(i)
         return result 
+    def selectBeteen(self, tablename, column, start, stop):
+        sql = "SELECT * FROM "+ tablename + " WHERE " + column + " BETWEEN " + start + " AND " + stop
+        data = self.db.execute()
+        result = []
+        for i in data:
+            result.append(i)
+        return result
     def selectWithCommand(self, tablename, command = None, column = "*", param = None, optionalFirstCommand = None):
         if command == None:
             sql = "SELECT " + column + " from " + tablename
