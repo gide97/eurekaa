@@ -44,5 +44,5 @@ class MQTTService:
         '''
             payload shall be bytearray
         '''
-        print(f'publish -- {topic} -- {payload}')
+        # print(f'publish -- {topic} -- {payload}')
         self.client.publish(topic,payload)

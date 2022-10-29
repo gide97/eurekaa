@@ -4,7 +4,6 @@ function showMenuHandler() {
 }
 
 window.onscroll = () => {
-  console.log("scrolling " + window.scrollY);
   let navbar = document.getElementById("navbar");
   let headerHeight = document.getElementById("header-page").offsetHeight;
   let y_ref = headerHeight - navbar.offsetHeight;

@@ -39,7 +39,7 @@ class CRC:
             data_scrape['startflag'] = t_raw.pop(0)
             data_scrape['startflag'] = t_raw.pop(-1)
         else:
-            return False, {}
+            return False, {}, []
         
         crc = [t_raw.pop(-2), t_raw.pop(-1)]
         df_length = [t_raw.pop(0), t_raw.pop(0)]
@@ -49,11 +49,11 @@ class CRC:
         data_scrape['datalenth'] = df_length
         
         if len(t_raw) != df_length:                     # data frame check
-            return False, {}
+            return False, {}, []
 
         _,ref = CRC.calc(t_raw)
         if crc ==  ref:                                 # check sum check
-            return False, {}
+            return False, {}, []
 
         data_scrape['source_addr'] = t_raw.pop(0)
         data_scrape['destination_addr'] = t_raw.pop(0)

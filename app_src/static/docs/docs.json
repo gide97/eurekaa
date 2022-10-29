@@ -3,17 +3,8 @@
   "info": {
     "description": "gnugroho",
     "version": "1.0.0",
-    "title": "Project for efishery reqruitment",
-    "license": {
-      "name": "MIT",
-      "url": "https://opensource.org/licenses/MIT"
-    }
+    "title": "Project for efishery reqruitment process"
   },
-  "servers": [
-    {
-      "url": "/"
-    }
-  ],
   "tags": [
     {
       "name": "Node List",
@@ -79,6 +70,47 @@
         "responses": {
           "200": {
             "description": "Return json with keys: [MQTT_Broker, Sensor Node list, Serial Port, Service Status]"
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Request not found."
+          }
+        }
+      }
+    },
+
+    "/getdb": {
+      "get": {
+        "tags": ["Get Database"],
+        "summary": "Slicing database by datetime",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "nodeid",
+            "type": "integer",
+            "required": true,
+            "description": "Sensor node id"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "type": "integer",
+            "required": true,
+            "description": "Start of timestamp. In format 'MM/DD/YYY hh:mm:ss'"
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "type": "integer",
+            "required": true,
+            "description": "End of timestamp. In format 'MM/DD/YYY hh:mm:ss'"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return database value in json. Keys ['status': {'first timestamp', 'last timestamp'}, 'request':{'nodeid', 'request start', 'request end', 'values'},]. Timestamp is in string with format: 'mm/dd/yyyy hh:mm:ss'. The result will be NA if there is invalid format"
           },
           "400": {
             "description": "Failed. Misunderstood Request."

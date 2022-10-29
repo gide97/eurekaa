@@ -79,9 +79,16 @@ class sushiWrapper(object):
         for i in data:
             result.append(i)
         return result 
-    def selectBeteen(self, tablename, column, start, stop):
-        sql = "SELECT * FROM "+ tablename + " WHERE " + column + " BETWEEN " + start + " AND " + stop
-        data = self.db.execute()
+    def selectBetween(self, tablename, column, start, stop):
+        sql = "SELECT * FROM "+ tablename + " WHERE " + column + " BETWEEN '" + start + "' AND '" + stop + "'"
+        data = self.db.execute(sql)
+        result = []
+        for i in data:
+            result.append(i)
+        return result
+    def getLastRecord(self):
+        sql = 'SELECT * FROM Node_1 ORDER BY Timestamp DESC LIMIT 1'
+        data = self.db.execute(sql)
         result = []
         for i in data:
             result.append(i)
@@ -131,6 +138,12 @@ class sushiWrapper(object):
             self.db.execute(sql, value)
         else:
             self.db.execute(sql)
+    def isExist(self, tablename):
+        sql = f"""SELECT Name FROM sqlite_master WHERE Type='table' AND Name='{tablename}'"""
+        res = list(self.db.execute(sql))    
+        if res == []:
+            return True
+        return False
     def isEmpty(self, tabelname):
         num = self.getLength(tabelname)
         if num == 0:

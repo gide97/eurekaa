@@ -2,6 +2,7 @@ var mqtt;
 let host = "10.23.16.33";
 let port = 9001;
 let log = [];
+let topicWantToDraw = "sensor_0";
 
 function onConnect() {
   console.log("connected to broker");
@@ -29,13 +30,12 @@ function onFailure(message) {
 function onMessageArrived(message) {
   let topic = message.destinationName;
   let payload = message.payloadString;
-
   const newLog = document.createElement("div");
   const textNode = document.createTextNode(
     `TOPIC: ${topic} MESSAGE: ${payload}`
   );
 
-  if (topic == "sensor_0") {
+  if (topic == `"${topicWantToDraw}"`) {
     drawChart(JSON.parse(payload));
   }
 
@@ -71,6 +71,12 @@ function MQTTConnect() {
   mqtt.connect(options);
 }
 
+/*
+  DRAWING CHART
+*/
+function changeDrawTopic() {
+  topicWantToDraw = document.getElementById("topic_to_draw").value;
+}
 function drawChart(sensorData) {
   let xValues = [];
   let yValues = [];
