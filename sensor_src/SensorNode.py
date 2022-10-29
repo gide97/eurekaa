@@ -7,7 +7,7 @@ from random import randint
 from utils.utilities import CRC, Command, generateDataFrame
 
 class Node:
-    def __init__(self, serialPort:str, baudRate:int, nodeId:int=None)->None:
+    def __init__(self, serialPort:str, baudRate:int, nodeId:int)->None:
         self.serialPort = serialPort
         self.baudRate = baudRate
         self.id = nodeId
@@ -111,3 +111,44 @@ class Node:
                     # response = self.apiCall(data, None)                                  # pass data to API handler
                     response = generateDataFrame(self.id, data['source_addr'], Command.ack, ack)
                     self.ser.write(bytearray(response))                                    # send ack to client
+
+import sys
+import getopt
+import time
+
+optlist, args = getopt.getopt(sys.argv[1:], 'p:i:b:')
+print(optlist)
+def reject():
+    print('ERROR!! Arguments needed')
+    print()
+    print('Usage    :')
+    print('          python SensorNode.py -p <usb port> -i <node id>')
+    print('          usb port     : Usb port')
+    print('          node id      : 1-255')
+    print()
+    print('Example  : python SensorNode.py -p /dev/ttyUSB1 -i 1')
+    exit(1)
+
+_SERIAL_PORT = None
+_SERIAL_BAUD_RATE = None
+_NODE_ID = None
+validation_val = 0x00
+for opt in optlist:
+    if validation_val == 0x07:
+        break
+    if '-p' in opt:
+        validation_val |= 0x1
+        _SERIAL_PORT = opt[1]
+    if '-b' in opt:
+        validation_val |= 0x2
+        _SERIAL_BAUD_RATE = int(opt[1])
+    if '-i' in opt:
+        validation_val |= 0x4
+        _NODE_ID = int(opt[1])
+    
+
+if validation_val != 0x07:
+    reject()
+node = Node(_SERIAL_PORT, _SERIAL_BAUD_RATE, _NODE_ID)
+while True:
+    time.sleep(1)
