@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 , maximum-scale=1.0, user-scalable=0">
     <title>Sensor monitor</title>
 
     <script
@@ -13,23 +13,33 @@
       referrerpolicy="no-referrer"
     ></script>
     <script src="{{url_for('static', filename='js/index.js')}}"></script>
+    <script src="{{url_for('static', filename='js/simple_ux.js')}}"></script>
     <link
       rel="stylesheet"
       href="{{url_for('static', filename='style/index.css')}}"
     ></link>
   </head>
   <body>
-    <div class="navbar">
+    <div class="navbar" id="navbar">
       <div>gnugroho</div>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/appconfig">Config</a></li>
-        <li><a href="/checkmqtt">Mqtt Watcher</a></li>
-        <li><a href="/docs">Docs</a></li>
-      </ul>
+      <div class="nav-links slide" id="nav-menu">
+        <ul >
+          <li><a href="/">Home</a></li>
+          <li><a href="/appconfig">Config</a></li>
+          <li><a href="/checkmqtt">Mqtt Watcher</a></li>
+          <li><a href="/docs">Docs</a></li>
+        </ul>
+        
+      </div>
+      <div class="ham-bt" onclick="showMenuHandler()">
+        <input type="checkbox" id="show-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
     </div>
   
-    <div class="header">
+    <div class="header" id="header-page">
       <h1>Home</h1>
       <p>
         Lorem ipsum dolor, sit amet consectetur adipisicing elit. A quidem sit qui quia nulla corporis rem voluptate laudantium accusantium eos aliquam earum facere provident eius tempore, neque quam cum maiores?
