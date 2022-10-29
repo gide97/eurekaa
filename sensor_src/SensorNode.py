@@ -43,8 +43,12 @@ class Node:
         # node routine system
         self.serialTimeout = 5
         self.sampleMeasurementRate = 1                                                      # Time period for read sensor
-        threading.Thread(target=self.listener, daemon=True).start()
+        # threading.Thread(target=self.listener, daemon=True).start()
         threading.Thread(target=self.sensor_measurement, daemon=True).start()
+    
+    def reinit(self):
+        self.serialTimeout = 5
+        self.sampleMeasurementRate = 1
 
     def apiCall(self, api, data):
         return self.api[api](data)
@@ -59,7 +63,17 @@ class Node:
     def handler_read(self) -> str:
         return json.dumps(self.sensorvalues)
     
-    def handler_write(self) -> str:
+    def handler_write(self, data:list) -> str:
+        try:
+            data = ''.join([chr(i) for i in data])
+            data = json.loads(data)
+            if data['command'] == 'sampling_rate':  # SET MEASUREMENT SAMPLING RATE
+                self.sampleMeasurementRate == data['value']
+            if data['command'] == 'reset':          # SET NODE CONFIGURATION TO DEFAULT
+                self.reinit()
+        except:
+            return f'NA'
+
         return f'OK'
 
     # Sensor metrology
@@ -67,6 +81,10 @@ class Node:
         while True:
             for i in range(0,5):
                 self.sensorvalues[f'sensor {i+1}'] = randint(0,100)
+
+                # Request to publish sensors value
+                buffer = generateDataFrame(self.id, 0, Command.action, json.dumps({"command":"publish", "topic":f"sensor_{self.id}", "values":self.sensorvalues}))
+                self.ser.write(buffer)
                 time.sleep(self.sampleMeasurementRate)
 
     # Communication
@@ -122,8 +140,9 @@ def reject():
     print('ERROR!! Arguments needed')
     print()
     print('Usage    :')
-    print('          python SensorNode.py -p <usb port> -i <node id>')
+    print('          python SensorNode.py -p <usb port> -b <baud rate> -i <node id>')
     print('          usb port     : Usb port')
+    print('          baud rate    : Baud rate')
     print('          node id      : 1-255')
     print()
     print('Example  : python SensorNode.py -p /dev/ttyUSB1 -i 1')
